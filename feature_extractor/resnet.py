@@ -261,14 +261,6 @@ def resnet50(input_tensor,
     x = identity_block(x, 3, [512, 512, 2048],
                        stage=5, block='c', **block_config)
 
-    x = layers.Conv2D(
-        512, (3, 3),
-        strides=(1, 1),
-        padding='same',
-        use_bias=False,
-        kernel_initializer='he_normal',
-        kernel_regularizer=_gen_l2_regularizer(use_l2_regularizer),
-        name='compression_layer')(x)
     x = tf.squeeze(x, axis=squeeze_axis)
     return x
 
@@ -401,14 +393,6 @@ def resnet18(input_tensor,
     x = identity_block(x, 3, [512, 512, 2048],
                        stage=5, block='c', **block_config)
 
-    x = layers.Conv2D(
-        512, (3, 3),
-        strides=(1, 1),
-        padding='same',
-        use_bias=False,
-        kernel_initializer='he_normal',
-        kernel_regularizer=_gen_l2_regularizer(use_l2_regularizer),
-        name='compression_layer')(x)
     x = tf.squeeze(x, axis=squeeze_axis)
 
     return x
