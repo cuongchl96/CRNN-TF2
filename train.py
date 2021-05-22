@@ -43,12 +43,15 @@ if __name__ == "__main__":
     parser.add_argument('--augment_level', type=int, default=5, help='level of RandAugment')
     parser.add_argument('--batch_size', type=int, default=32, help='batch size')
     parser.add_argument('--num_epochs', type=int, default=100, help='number of epochs')
+    parser.add_argument('--num_warmup_steps', type=int, default=100, help='number of warmup steps')
+    parser.add_argument('--initial_lnr', type=float, default=1.0, help='number of warmup steps')
     parser.add_argument('--imgH', type=int, default=32, help='the height of the input image')
     parser.add_argument('--imgW', type=int, default=280, help='the width of the input image')
     parser.add_argument('--max_len', type=int, default=12, help='maximum-label-length')
     parser.add_argument('--hidden_size', type=int, default=256, help='the size of the LSTM hidden state')
     parser.add_argument('--character', type=str, default='0123456789', help='character label')
     parser.add_argument('--rgb', action='store_true', help='use rgb input')
+
 
     parser.add_argument('--log_dir', type=str, required=True, help='path to save checkpoint')
     parser.add_argument('--log_interval', type=int, default=10, help='number of steps to log')
@@ -77,7 +80,7 @@ if __name__ == "__main__":
     logging.info('Total number of model parameters: ' + str(model.count_params()))
 
     loss_func = tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True)
-    learning_rate = CosineDecayWithWarmup(base_lr=1.0, total_steps=num_steps, warmup_steps=1000)
+    learning_rate = CosineDecayWithWarmup(base_lr=opt.initial_lnr, total_steps=num_steps, warmup_steps=opt.num_warmup_steps)
     optimizer = tf.keras.optimizers.Adadelta(learning_rate=learning_rate)
 
     checkpoint = tf.train.Checkpoint(optimizer=optimizer, model=model)
@@ -98,16 +101,12 @@ if __name__ == "__main__":
         label = tf.convert_to_tensor(label)
 
         with tf.GradientTape() as tape:
-            start = time.time()
             logits = model((image, label[:, :-1]), training=True)
-
-            start = time.time()
             loss = loss_func(y_true=label[:, 1:], y_pred=logits)
             grads = tape.gradient(loss, model.trainable_variables)
             optimizer.apply_gradients(zip(grads, model.trainable_variables))
 
             logits = tf.argmax(logits, axis=2)
-
             logits = logits.numpy()
             labels = label[:, 1:].numpy()
             num_totals += len(logits)

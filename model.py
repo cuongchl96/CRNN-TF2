@@ -13,7 +13,7 @@ from data_helper.data_utils import AttnLabelConverter, NormalizePAD
 
 def get_crnn_attention_model(image_tensor, text_tensor, is_train, opt=None):
     image_features = resnet50_slim(image_tensor)
-    seq_features = Attention_BiLSTM(image_features)
+    seq_features = Attention_BiLSTM(image_features, hidden_units=int(opt.hidden_size / 2))
     logits = Attention(opt.hidden_size, opt.num_classes)(seq_features, text_tensor, is_train=is_train, batch_max_length=opt.max_len)
 
     return logits
