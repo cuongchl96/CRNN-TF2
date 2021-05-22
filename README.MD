@@ -1,0 +1,7 @@
+- [ ] EfficientNet V1 backbone
+- [ ] EfficientNet V2 backbone
+- [ ] Training summary (tensorboard)
+- [ ] Save best valid accuracy model
+- [ ] Refactor config to YAML file
+- [ ] CTC head
+- [ ] Disable TensorFloat32
