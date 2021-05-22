@@ -1,2 +1,8 @@
 datasets/*
 checkpoints/*
+__pycache__
+.vscode
+data_helper/__pycache__
+feature_extractor/__pycache__
+model_head/__pycache__
+sequence_modeling/__pycache__
