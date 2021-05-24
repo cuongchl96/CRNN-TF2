@@ -2,7 +2,9 @@ datasets/*
 checkpoints/*
 __pycache__
 .vscode
-data_helper/__pycache__
-feature_extractor/__pycache__
-model_head/__pycache__
-sequence_modeling/__pycache__
+modules/data_helper/__pycache__
+modules/feature_extractor/__pycache__
+modulesmodel_head/__pycache__
+modules/sequence_modeling/__pycache__
+modules/__pycache__
+modules.egg-info
