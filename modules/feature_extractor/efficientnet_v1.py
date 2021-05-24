@@ -435,5 +435,46 @@ def EfficientNet(image_input, model_name):
 
     return efficientnet(image_input, model_configs)
 
+def EfficientNetB0(image_input):
+    model_configs = MODEL_CONFIGS['efficientnet-b0']
+    return efficientnet(image_input, model_configs)
+
+def EfficientNetB1(image_input):
+    model_configs = MODEL_CONFIGS['efficientnet-b1']
+    return efficientnet(image_input, model_configs)
+    
+def EfficientNetB2(image_input):
+    model_configs = MODEL_CONFIGS['efficientnet-b2']
+    return efficientnet(image_input, model_configs)
+
+def EfficientNetB3(image_input):
+    model_configs = MODEL_CONFIGS['efficientnet-b3']
+    return efficientnet(image_input, model_configs)
+
+def EfficientNetB4(image_input):
+    model_configs = MODEL_CONFIGS['efficientnet-b4']
+    return efficientnet(image_input, model_configs)
+
+def EfficientNetB0s(image_input):
+    model_configs = MODEL_CONFIGS_SLIM['efficientnet-b0s']
+    return efficientnet(image_input, model_configs)
+
+def EfficientNetB1s(image_input):
+    model_configs = MODEL_CONFIGS_SLIM['efficientnet-b1s']
+    return efficientnet(image_input, model_configs)
+    
+def EfficientNetB2s(image_input):
+    model_configs = MODEL_CONFIGS_SLIM['efficientnet-b2s']
+    return efficientnet(image_input, model_configs)
+
+def EfficientNetB3s(image_input):
+    model_configs = MODEL_CONFIGS_SLIM['efficientnet-b3s']
+    return efficientnet(image_input, model_configs)
+
+def EfficientNetB4s(image_input):
+    model_configs = MODEL_CONFIGS_SLIM['efficientnet-b4s']
+    return efficientnet(image_input, model_configs)
+
+
 if __name__ == "__main__":
     pass

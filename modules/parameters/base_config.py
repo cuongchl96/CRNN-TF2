@@ -259,7 +259,7 @@ class Config(params_dict.ParamsDict):
         with tf.io.gfile.GFile(file_path, 'r') as f:
             loaded = yaml.load(f, Loader=yaml.FullLoader)
             config = cls()
-            config.override(loaded)
+            config.override(loaded, is_strict=False)
             return config
 
     @classmethod

@@ -2,6 +2,7 @@
 - [ ] EfficientNet V2 backbone
 - [ ] Training summary (tensorboard)
 - [ ] Save best valid accuracy model
-- [ ] Refactor config to YAML file
+- [X] Refactor config to YAML file
 - [ ] CTC head
-- [ ] Disable TensorFloat32
+- [X] Disable TensorFloat32
+- [ ] Export SavedModel

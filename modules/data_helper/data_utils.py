@@ -22,7 +22,7 @@ class AttnLabelConverter(object):
         # character (str): set of the possible characters.
         # [GO] for the start token of the attention decoder. [s] for end-of-sentence token.
         list_token = ['[GO]', '[s]']
-        list_character = list(self.opt.character)
+        list_character = list(self.opt.model_params.character)
         self.character = list_token + list_character
 
         self.dict = {}
@@ -42,7 +42,7 @@ class AttnLabelConverter(object):
         """
         length = [len(s) + 1 for s in text]  # +1 for [s] at end of sentence.
         # batch_max_length = max(length) # this is not allowed for multi-gpu setting
-        batch_max_length = self.opt.max_len + 1
+        batch_max_length = self.opt.model_params.max_len + 1
         # additional +1 for [GO] at first step. batch_text is padded with [GO] token after [s] token.
         batch_text = np.zeros((len(text), batch_max_length + 1), dtype=int)
         for i, t in enumerate(text):
@@ -72,9 +72,10 @@ class ResizeNormalize(object):
 
 class NormalizePAD(object):
     def __init__(self, opt, is_training):
-        self.max_size = (opt.imgH, opt.imgW, opt.num_channels)
+        self.opt = opt
+        self.max_size = (opt.model_params.imgH, opt.model_params.imgW, opt.model_params.num_channels)
         self.is_training = is_training
-        self.augment = augmenter.RandAugment(magnitude=opt.augment_level)
+        self.augment = augmenter.RandAugment(magnitude=opt.data_augmentation.augment_level)
 
     def __call__(self, img):
         h, w, c = img.shape
@@ -95,7 +96,7 @@ class NormalizePAD(object):
         
         pad_img[:, start_w:start_w + w, :] = img
 
-        if self.is_training:
+        if self.is_training and random.random() < self.opt.data_augmentation.prob:
             pad_img = tf.convert_to_tensor(pad_img)
             pad_img = self.augment.distort(pad_img)
             pad_img = pad_img.numpy().astype(np.uint8)
@@ -109,22 +110,4 @@ class NormalizePAD(object):
         return tf.convert_to_tensor(pad_img)
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser()
-    parser.add_argument('--imgH', type=int, default=32, help='the height of the input image')
-    parser.add_argument('--imgW', type=int, default=280, help='the width of the input image')
-    parser.add_argument('--max_len', type=int, default=15, help='maximum-label-length')
-    parser.add_argument('--hidden_size', type=int, default=512, help='the size of the LSTM hidden state')
-    parser.add_argument('--character', type=str, default='0123456789', help='character label')
-    parser.add_argument('--rgb', action='store_true', help='use rgb input')
-    opt = parser.parse_args()
-
-    opt.num_classes = len(opt.character)
-    opt.num_channels = 1
-    if opt.rgb:
-        opt.num_channels = 3
-
-    converter = AttnLabelConverter(opt)
-    text = ['101245323', '101000999', '101000111777']
-    text, length = converter.encode(text)
-    print(text)
-    print(length)
+    pass
