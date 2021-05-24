@@ -24,7 +24,7 @@ if __name__ == "__main__":
     opt = Config.from_yaml(args.config_file)
 
     text_converter = AttnLabelConverter(opt)
-    image_converter = NormalizePAD(opt, is_training=True)
+    image_converter = NormalizePAD(opt, is_training=False)
     opt.model_params.num_classes = len(text_converter.character)
 
     image_tensor = tf.keras.layers.Input(shape=[opt.model_params.imgH, opt.model_params.imgW, opt.model_params.num_channels])
