@@ -1,4 +1,4 @@
-- [ ] EfficientNet V1 backbone
+- [X] EfficientNet V1 backbone
 - [ ] EfficientNet V2 backbone
 - [ ] Training summary (tensorboard)
 - [ ] Save best valid accuracy model
