@@ -8,3 +8,4 @@ modulesmodel_head/__pycache__
 modules/sequence_modeling/__pycache__
 modules/__pycache__
 modules.egg-info
+exported_models

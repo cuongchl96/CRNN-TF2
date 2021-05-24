@@ -5,4 +5,5 @@
 - [X] Refactor config to YAML file
 - [ ] CTC head
 - [X] Disable TensorFloat32
-- [ ] Export SavedModel
+- [X] Export SavedModel
+- [X] Infer SavedModel

@@ -52,11 +52,17 @@ class AttnLabelConverter(object):
             batch_text[i][1:1 + len(cur_text)] = cur_text
         return tf.convert_to_tensor(batch_text, dtype=tf.int32), tf.convert_to_tensor(length, dtype=tf.int32)
 
-    def decode(self, text_index, length):
+    def decode(self, text_index):
         """ convert text-index into text-label. """
         texts = []
-        for index, l in enumerate(length):
-            text = ''.join([self.character[i] for i in text_index[index, :]])
+        for idx, text_idx in enumerate(text_index):
+            text = ''
+            text_idx = text_idx.numpy()
+            for i in range(len(text_idx)):
+                if text_idx[i] == 1:
+                    break
+                else:
+                    text += self.character[text_idx[i]]
             texts.append(text)
         return texts
 
