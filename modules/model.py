@@ -26,7 +26,12 @@ backbone_factory = {
     'efficientnet-b1s': efficientnet_v1.EfficientNetB1s,
     'efficientnet-b2s': efficientnet_v1.EfficientNetB2s,
     'efficientnet-b3s': efficientnet_v1.EfficientNetB3s,
-    'efficientnet-b4s': efficientnet_v1.EfficientNetB4s
+    'efficientnet-b4s': efficientnet_v1.EfficientNetB4s,
+    'efficientnet-b0t': efficientnet_v1.EfficientNetB0t,
+    'efficientnet-b1t': efficientnet_v1.EfficientNetB1t,
+    'efficientnet-b2t': efficientnet_v1.EfficientNetB2t,
+    'efficientnet-b3t': efficientnet_v1.EfficientNetB3t,
+    'efficientnet-b4t': efficientnet_v1.EfficientNetB4t
 }
 
 seq_modeling_factory = {
@@ -71,15 +76,22 @@ def get_crnn_attention_model(image_tensor, text_tensor, is_train, opt=None):
 
 if __name__ == "__main__":
     image_input = tf.keras.layers.Input(shape=[32, 280, 3])
-    output = efficientnet_v1.EfficientNetB2(image_input, 'efficientnet-b2')
+    output = efficientnet_v1.EfficientNetB2(image_input)
     print(output.get_shape)
     model = tf.keras.Model(inputs=image_input, outputs=output, name='effnet2')
     print('Effnet-b2 parameters: ', model.count_params())
 
     image_input = tf.keras.layers.Input(shape=[32, 280, 3])
-    output = efficientnet_v1.EfficientNetB2s(image_input, 'efficientnet-b2s')
+    output = efficientnet_v1.EfficientNetB2s(image_input)
     print(output.get_shape)
     model = tf.keras.Model(inputs=image_input, outputs=output, name='effnet2s')
     print('Effnet-b2s parameters: ', model.count_params())
+
+    image_input = tf.keras.layers.Input(shape=[32, 280, 3])
+    output = efficientnet_v1.EfficientNetB2t(image_input)
+    print(output.get_shape)
+    model = tf.keras.Model(inputs=image_input, outputs=output, name='effnet2t')
+    print('Effnet-b2t parameters: ', model.count_params())
+
 
 

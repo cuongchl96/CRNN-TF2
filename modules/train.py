@@ -18,7 +18,7 @@ from modules.model import get_crnn_attention_model
 from modules.parameters.base_config import Config
 
 logging.basicConfig(format='%(asctime)s - %(levelname)s - %(message)s', level=logging.DEBUG)
-# tf.config.experimental.enable_tensor_float_32_execution(False)
+tf.config.experimental.enable_tensor_float_32_execution(False)
 
 def validator(model, generator, opt):
     num_corrects = 0

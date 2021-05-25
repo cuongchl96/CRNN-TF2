@@ -1,0 +1,27 @@
+model_build:
+  backbone: efficientnet-b2s
+  sequence_modeling: abilstm
+  model_head: attention
+model_params:
+  imgH: 32
+  imgW: 280
+  num_channels: 3
+  max_len: 12
+  hidden_size: 256
+  character: 0123456789
+dataset:
+  train_set: datasets/IDNum/idnum_train.tfrecords
+  valid_set: datasets/IDNum/idnum_valid.tfrecords
+  test_set: datasets/IDNum/idnum_test.tfrecords
+data_augmentation:
+  prob: 1.0
+  augment_level: 5
+training_params:
+  optimizer: Adadelta
+  num_epochs: 50
+  batch_size: 32
+  initial_lnr: 1.0
+  num_warmup_steps: 0
+  log_dir: checkpoints/Effnetb2s-abilstm256-attention-rgb
+  log_interval: 200
+  save_interval: 1600

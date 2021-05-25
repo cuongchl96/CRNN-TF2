@@ -108,6 +108,46 @@ class ModelConfigSlim(base_config.Config):
     data_format: str = 'channels_last'
     dtype: str = 'float32'
 
+@dataclass
+class ModelConfigTiny(base_config.Config):
+    """Default Config for Efficientnet-B0."""
+    width_coefficient: float = 1.0
+    depth_coefficient: float = 1.0
+    resolution: int = 224
+    dropout_rate: float = 0.2
+    blocks: Tuple[BlockConfig, ...] = (
+        # (input_filters, output_filters, kernel_size, num_repeat,
+        #  expand_ratio, strides, se_ratio)
+        # pylint: disable=bad-whitespace
+        BlockConfig.from_args(32, 16, 3, 1, 1, (1, 1), 0.25),
+        BlockConfig.from_args(16, 24, 3, 2, 4, (2, 2), 0.25),
+        BlockConfig.from_args(24, 40, 3, 2, 1, (2, 1), 0.25),
+        BlockConfig.from_args(40, 80, 3, 2, 1, (2, 1), 0.25),
+        BlockConfig.from_args(80, 112, 5, 2, 4, (1, 1), 0.25),
+        BlockConfig.from_args(112, 192, 3, 2, 1, (2, 1), 0.25),
+        BlockConfig.from_args(192, 320, 3, 1, 4, (1, 1), 0.25),
+        # pylint: enable=bad-whitespace
+    )
+    stem_base_filters: int = 32
+    top_base_filters: int = 512
+    activation: str = 'simple_swish'
+    batch_norm: str = 'default'
+    bn_momentum: float = 0.99
+    bn_epsilon: float = 1e-3
+    # While the original implementation used a weight decay of 1e-5,
+    # tf.nn.l2_loss divides it by 2, so we halve this to compensate in Keras
+    weight_decay: float = 5e-6
+    drop_connect_rate: float = 0.2
+    depth_divisor: int = 8
+    min_depth: Optional[int] = None
+    use_se: bool = True
+    input_channels: int = 3
+    num_classes: int = 1000
+    model_name: str = 'efficientnet'
+    rescale_input: bool = True
+    data_format: str = 'channels_last'
+    dtype: str = 'float32'
+
 
 MODEL_CONFIGS = {
     # (width, depth, resolution, dropout)
@@ -135,6 +175,20 @@ MODEL_CONFIGS_SLIM = {
     'efficientnet-b7s': ModelConfigSlim.from_args(2.0, 3.1, 600, 0.5),
     'efficientnet-b8s': ModelConfigSlim.from_args(2.2, 3.6, 672, 0.5),
     'efficientnet-l2s': ModelConfigSlim.from_args(4.3, 5.3, 800, 0.5),
+}
+
+MODEL_CONFIGS_TINY = {
+    # (width, depth, resolution, dropout)
+    'efficientnet-b0t': ModelConfigTiny.from_args(1.0, 1.0, 224, 0.2),
+    'efficientnet-b1t': ModelConfigTiny.from_args(1.0, 1.1, 240, 0.2),
+    'efficientnet-b2t': ModelConfigTiny.from_args(1.1, 1.2, 260, 0.3),
+    'efficientnet-b3t': ModelConfigTiny.from_args(1.2, 1.3, 300, 0.3),
+    'efficientnet-b4t': ModelConfigTiny.from_args(1.4, 1.8, 380, 0.4),
+    'efficientnet-b5t': ModelConfigTiny.from_args(1.6, 2.2, 456, 0.4),
+    'efficientnet-b6t': ModelConfigTiny.from_args(1.8, 2.6, 528, 0.5),
+    'efficientnet-b7t': ModelConfigTiny.from_args(2.0, 3.1, 600, 0.5),
+    'efficientnet-b8t': ModelConfigTiny.from_args(2.2, 3.6, 672, 0.5),
+    'efficientnet-l2t': ModelConfigTiny.from_args(4.3, 5.3, 800, 0.5),
 }
 
 CONV_KERNEL_INITIALIZER = {
@@ -475,6 +529,25 @@ def EfficientNetB4s(image_input):
     model_configs = MODEL_CONFIGS_SLIM['efficientnet-b4s']
     return efficientnet(image_input, model_configs)
 
+def EfficientNetB0t(image_input):
+    model_configs = MODEL_CONFIGS_TINY['efficientnet-b0t']
+    return efficientnet(image_input, model_configs)
+
+def EfficientNetB1t(image_input):
+    model_configs = MODEL_CONFIGS_TINY['efficientnet-b1t']
+    return efficientnet(image_input, model_configs)
+
+def EfficientNetB2t(image_input):
+    model_configs = MODEL_CONFIGS_TINY['efficientnet-b2t']
+    return efficientnet(image_input, model_configs)
+
+def EfficientNetB3t(image_input):
+    model_configs = MODEL_CONFIGS_TINY['efficientnet-b3t']
+    return efficientnet(image_input, model_configs)
+
+def EfficientNetB4t(image_input):
+    model_configs = MODEL_CONFIGS_TINY['efficientnet-b4t']
+    return efficientnet(image_input, model_configs)
 
 if __name__ == "__main__":
     pass
