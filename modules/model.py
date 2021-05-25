@@ -7,7 +7,7 @@ import argparse
 import logging
 
 from modules.feature_extractor.resnet import resnet18_slim, resnet50_slim, resnet50, resnet18
-from modules.feature_extractor import efficientnet_v1
+from modules.feature_extractor import efficientnet_v1, efficientnet_v2
 from modules.sequence_modeling.bilstm import Attention_BiLSTM, BiLSTM, Attention_BiLSTM_v2, BiLSTM_v2
 from modules.model_head.attention import Attention
 from modules.model_head.ctc import CTC
@@ -31,7 +31,15 @@ backbone_factory = {
     'efficientnet-b1t': efficientnet_v1.EfficientNetB1t,
     'efficientnet-b2t': efficientnet_v1.EfficientNetB2t,
     'efficientnet-b3t': efficientnet_v1.EfficientNetB3t,
-    'efficientnet-b4t': efficientnet_v1.EfficientNetB4t
+    'efficientnet-b4t': efficientnet_v1.EfficientNetB4t,
+    'efficientnetv2-b0': efficientnet_v2.EfficientNetV2B0,
+    'efficientnetv2-b1': efficientnet_v2.EfficientNetV2B1,
+    'efficientnetv2-b2': efficientnet_v2.EfficientNetV2B2,
+    'efficientnetv2-b3': efficientnet_v2.EfficientNetV2B3,
+    'efficientnetv2-s': efficientnet_v2.EfficientNetV2S,
+    'efficientnetv2-m': efficientnet_v2.EfficientNetV2M,
+    'efficientnetv2-slim': efficientnet_v2.EfficientNetV2Slim,
+    'efficientnetv2-tiny': efficientnet_v2.EfficientNetV2Tiny,
 }
 
 seq_modeling_factory = {
@@ -92,6 +100,30 @@ if __name__ == "__main__":
     print(output.get_shape)
     model = tf.keras.Model(inputs=image_input, outputs=output, name='effnet2t')
     print('Effnet-b2t parameters: ', model.count_params())
+
+    image_input = tf.keras.layers.Input(shape=[32, 280, 3])
+    output = efficientnet_v2.EfficientNetV2S(image_input)
+    print(output.get_shape)
+    model = tf.keras.Model(inputs=image_input, outputs=output, name='effnetv2s')
+    print('Effnetv2-S parameters: ', model.count_params())
+
+    image_input = tf.keras.layers.Input(shape=[32, 280, 3])
+    output = efficientnet_v2.EfficientNetV2B0(image_input)
+    print(output.get_shape)
+    model = tf.keras.Model(inputs=image_input, outputs=output, name='effnetv2b0')
+    print('Effnetv2-B0 parameters: ', model.count_params())
+
+    image_input = tf.keras.layers.Input(shape=[32, 280, 3])
+    output = efficientnet_v2.EfficientNetV2Slim(image_input)
+    print(output.get_shape)
+    model = tf.keras.Model(inputs=image_input, outputs=output, name='effnetv2slim')
+    print('Effnetv2-slim parameters: ', model.count_params())
+
+    image_input = tf.keras.layers.Input(shape=[32, 280, 3])
+    output = efficientnet_v2.EfficientNetV2Tiny(image_input)
+    print(output.get_shape)
+    model = tf.keras.Model(inputs=image_input, outputs=output, name='effnetv2tiny')
+    print('Effnetv2-tiny parameters: ', model.count_params())
 
 
 
