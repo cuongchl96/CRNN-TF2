@@ -1,5 +1,5 @@
 - [X] EfficientNet V1 backbone
-- [ ] EfficientNet V2 backbone
+- [X] EfficientNet V2 backbone
 - [ ] Training summary (tensorboard)
 - [ ] Save best valid accuracy model
 - [X] Refactor config to YAML file
