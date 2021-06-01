@@ -1,6 +1,6 @@
 - [X] EfficientNet V1 backbone
 - [X] EfficientNet V2 backbone
-- [ ] Training summary (tensorboard)
+- [X] Training summary (tensorboard)
 - [ ] Save best valid accuracy model
 - [X] Refactor config to YAML file
 - [ ] CTC head

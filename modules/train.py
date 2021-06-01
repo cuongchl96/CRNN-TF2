@@ -36,18 +36,24 @@ if gpus:
 def validator(model, generator, opt):
     num_corrects = 0
     num_totals = 0
+    total_loss = 0
+    num_steps = 0
     for image, label, length in generator.gen(opt.training_params.batch_size):
+        num_steps += 1
         image = tf.convert_to_tensor(image)
         label = tf.convert_to_tensor(label)
 
         logits = model((image, label[:, :-1]), training=False)
+        loss = loss_func(y_true=label[:, 1:], y_pred=logits)
         logits = tf.argmax(logits, axis=2)
 
         logits = logits.numpy()
         labels = label[:, 1:].numpy()
         num_totals += len(logits)
         num_corrects += np.sum(np.sum(logits - labels, axis=1) == 0)
-    return num_corrects * 100.0 / num_totals
+        total_loss += loss
+
+    return num_corrects * 100.0 / num_totals, total_loss / num_steps
 
 
 if __name__ == "__main__":
@@ -97,8 +103,12 @@ if __name__ == "__main__":
             'Checkpoint file %s found and restoring from ''checkpoint', latest_checkpoint)
         checkpoint.restore(latest_checkpoint)
 
+    summary_writer = tf.summary.create_file_writer(opt.training_params.log_dir)
+
     num_corrects = 0
     num_totals = 0
+    training_loss = 0
+
     for image, label, length in train_generator.gen(opt.training_params.batch_size):
         image = tf.convert_to_tensor(image)
         label = tf.convert_to_tensor(label)
@@ -106,6 +116,7 @@ if __name__ == "__main__":
         with tf.GradientTape() as tape:
             logits = model((image, label[:, :-1]), training=True)
             loss = loss_func(y_true=label[:, 1:], y_pred=logits)
+            training_loss += loss
             grads = tape.gradient(loss, model.trainable_variables)
             optimizer.apply_gradients(zip(grads, model.trainable_variables))
 
@@ -122,13 +133,23 @@ if __name__ == "__main__":
 
         if cur_step % opt.training_params.save_interval == 0:
             save_path = checkpoint_manager.save()
-            logging.info("Saved checkpoint for step {}: {}".format(
-                cur_step, save_path))
-            logging.info("Training accuracy: %.3f" %
-                         (num_corrects * 100.0 / num_totals))
+            logging.info("Saved checkpoint for step {}: {}".format(cur_step, save_path))
+
+            training_loss = training_loss / opt.training_params.save_interval
+            training_accuracy = num_corrects * 100.0 / num_totals
+            logging.info("Training accuracy: %.3f\tTraining loss: %.3f" % (training_accuracy, training_loss))
+
             valid_generator = Dataset(opt.dataset.valid_set, epochs=1, text_converter=text_converter,
                                       image_converter=NormalizePAD(opt, is_training=False))
-            logging.info("Valid accuracy: %.3f" %
-                         validator(model, valid_generator, opt))
+            valid_accuracy, valid_loss = validator(model, valid_generator, opt)
+            logging.info("Valid accuracy: %.3f\tValid loss: %.3f" % (valid_accuracy, valid_loss))
+
+            with summary_writer.as_default():
+                tf.summary.scalar('train_loss', training_loss, step=cur_step)
+                tf.summary.scalar('train_accuracy', training_accuracy / 100, step=cur_step)
+                tf.summary.scalar('valid_loss', valid_loss, step=cur_step)
+                tf.summary.scalar('valid_accuracy', valid_accuracy / 100, step=cur_step)
+
             num_corrects = 0
             num_totals = 0
+            training_loss = 0
