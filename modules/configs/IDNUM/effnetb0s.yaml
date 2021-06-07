@@ -1,5 +1,5 @@
 model_build:
-  backbone: efficientnet-b2s
+  backbone: efficientnet-b0s
   sequence_modeling: abilstm
   model_head: attention
 model_params:
@@ -14,7 +14,7 @@ dataset:
   valid_set: datasets/IDNum/idnum_valid.tfrecords
   test_set: datasets/IDNum/idnum_test.tfrecords
 data_augmentation:
-  prob: 1.0
+  prob: 0.5
   augment_level: 5
 training_params:
   optimizer: Adadelta
@@ -22,6 +22,6 @@ training_params:
   batch_size: 32
   initial_lnr: 1.0
   num_warmup_steps: 0
-  log_dir: checkpoints/Effnetb2s-abilstm256-attention-rgb
+  log_dir: checkpoints/Effnetb0s-abilstm256-attention-rgb
   log_interval: 200
-  save_interval: 1600
+  save_interval: 3200
