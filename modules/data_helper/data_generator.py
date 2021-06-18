@@ -7,6 +7,7 @@ import argparse
 import numpy as np
 import time
 import random
+import logging
 
 from PIL import Image
 from six import BytesIO as IO
@@ -19,16 +20,19 @@ class Dataset(object):
         self.image_converter = image_converter
         self.ds_len = 0
 
-        dataset = tf.data.TFRecordDataset(filenames=[annotation_fn])
+        annotation_fn = annotation_fn.split()
+        logging.info('Read dataset from: {}'.format(' '.join(annotation_fn)))
+        dataset = tf.data.TFRecordDataset(filenames=annotation_fn)
         dataset = dataset.map(self._parse_record)
 
         counter = dataset.repeat(1)
         counter = dataset.batch(1)
         for ex in counter:
             self.ds_len += 1
+        logging.info('Number of samples in dataset: %d'%self.ds_len)
+        dataset = dataset.shuffle(buffer_size=self.ds_len)
         self.ds_len *= self.epochs
 
-        dataset = dataset.shuffle(buffer_size=500000)
         self.dataset = dataset.repeat(self.epochs)
 
     def get_length(self):
