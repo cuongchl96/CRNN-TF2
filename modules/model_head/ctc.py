@@ -7,4 +7,6 @@ import tensorflow as tf
 layers = tf.keras.layers
 
 def CTC(input_tensor, num_class):
-    x = layers.Dense(num_class)
+    x = layers.Dense(num_class)(input_tensor)
+    return x
+

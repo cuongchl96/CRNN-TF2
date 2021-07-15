@@ -115,5 +115,55 @@ class NormalizePAD(object):
         pad_img = (pad_img - 0.5) / 0.5
         return tf.convert_to_tensor(pad_img)
 
+class CTCLabelConverter(object):
+    """ Convert between text-label and text-index """
+
+    def __init__(self, opt):
+        # character (str): set of the possible characters.
+        self.opt = opt
+
+        list_token = ['[CTCblank]']
+        list_character = list(self.opt.model_params.character)
+        self.character = list_character + list_token
+
+        self.dict = {}
+        for i, char in enumerate(self.character):
+            self.dict[char] = i
+
+    def encode(self, text):
+        """convert text-label into text-index.
+        input:
+            text: text labels of each image. [batch_size]
+            batch_max_length: max length of text label in the batch. 25 by default
+        output:
+            text: text index for CTCLoss. [batch_size, batch_max_length]
+            length: length of each text. [batch_size]
+        """
+        length = [len(s) for s in text]
+        batch_max_length = self.opt.model_params.max_len
+        # The index used for padding (=0) would not affect the CTC loss calculation.
+        batch_text = np.zeros((len(text), batch_max_length), dtype=int)
+        for i, t in enumerate(text):
+            cur_text = list(t)
+            cur_text = [self.dict[char] for char in cur_text]
+            batch_text[i][:len(cur_text)] = cur_text
+
+        return tf.convert_to_tensor(batch_text, dtype=tf.int32), tf.convert_to_tensor(length, dtype=tf.int32)
+
+    def decode(self, text_index, length):
+        """ convert text-index into text-label. """
+        texts = []
+        for index, l in enumerate(length):
+            t = text_index[index, :]
+
+            char_list = []
+            for i in range(l):
+                if t[i] != 0 and (not (i > 0 and t[i - 1] == t[i])):  # removing repeated characters and blank.
+                    char_list.append(self.character[t[i]])
+            text = ''.join(char_list)
+
+            texts.append(text)
+        return texts
+
 if __name__ == "__main__":
     pass

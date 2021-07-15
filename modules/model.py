@@ -8,6 +8,7 @@ import logging
 
 from modules.feature_extractor.resnet import resnet18_slim, resnet50_slim, resnet50, resnet18
 from modules.feature_extractor import efficientnet_v1, efficientnet_v2, efficientnet_v1_multi
+from modules.sequence_modeling.transformer import TransformerBlock, positional_encoding
 from modules.sequence_modeling.bilstm import Attention_BiLSTM, BiLSTM, Attention_BiLSTM_v2, BiLSTM_v2
 from modules.model_head.attention import Attention
 from modules.model_head.ctc import CTC
@@ -84,48 +85,78 @@ def get_crnn_attention_model(image_tensor, text_tensor, is_train, opt=None):
 
     return logits
 
+def get_crnn_transformer_ctc_model(image_tensor, is_train, opt=None):
+    image_features = get_backbone(opt)(image_tensor)
+    image_features *= tf.math.sqrt(tf.cast(image_features.get_shape()[-1], tf.float32))
+
+    pos_encoding = positional_encoding(image_features.get_shape()[1], image_features.get_shape()[-1])
+    SA_blocks = [TransformerBlock(image_features.get_shape()[-1], opt.transformer.num_heads, image_features.get_shape()[-1], 0.1) \
+        for i in range(opt.transformer.num_layers)]
+
+    image_features += pos_encoding
+
+    sa_out = image_features
+    for SA_block in SA_blocks:
+        sa_out = SA_block(sa_out, training=is_train)
+
+    sa_out = tf.keras.layers.Softmax()(CTC(sa_out, opt.model_params.num_classes))
+
+    return sa_out
+
 if __name__ == "__main__":
-    image_input = tf.keras.layers.Input(shape=[32, 280, 3])
-    output = efficientnet_v1.EfficientNetB2(image_input)
-    print(output.get_shape)
-    model = tf.keras.Model(inputs=image_input, outputs=output, name='effnet2')
-    print('Effnet-b2 parameters: ', model.count_params())
+    pass
+    # from parameters.base_config import Config
+    # from data_helper.data_utils import AttnLabelConverter, NormalizePAD, CTCLabelConverter
 
-    image_input = tf.keras.layers.Input(shape=[32, 280, 3])
-    output = efficientnet_v1.EfficientNetB2s(image_input)
-    print(output.get_shape)
-    model = tf.keras.Model(inputs=image_input, outputs=output, name='effnet2s')
-    print('Effnet-b2s parameters: ', model.count_params())
+    # opt = Config.from_yaml('configs/IDNUM/effnetb0s.yaml')
+    # text_converter = CTCLabelConverter(opt)
+    # opt.model_params.num_classes = len(text_converter.character)
 
-    image_input = tf.keras.layers.Input(shape=[32, 280, 3])
-    output = efficientnet_v1.EfficientNetB2t(image_input)
-    print(output.get_shape)
-    model = tf.keras.Model(inputs=image_input, outputs=output, name='effnet2t')
-    print('Effnet-b2t parameters: ', model.count_params())
+    # image_tensor = tf.keras.layers.Input(
+    #     shape=[opt.model_params.imgH, opt.model_params.imgW, opt.model_params.num_channels])
+    # text_tensor = tf.keras.layers.Input(
+    #     shape=[opt.model_params.max_len + 1], dtype=tf.int32)
+    # logits = get_crnn_transformer_ctc_model(image_tensor, text_tensor, is_train=True, opt=opt)
+    # print(logits.shape)
 
-    image_input = tf.keras.layers.Input(shape=[32, 280, 3])
-    output = efficientnet_v2.EfficientNetV2S(image_input)
-    print(output.get_shape)
-    model = tf.keras.Model(inputs=image_input, outputs=output, name='effnetv2s')
-    print('Effnetv2-S parameters: ', model.count_params())
+    # image_input = tf.keras.layers.Input(shape=[32, 280, 3])
+    # output = efficientnet_v1.EfficientNetB2(image_input)
+    # print(output.get_shape)
+    # model = tf.keras.Model(inputs=image_input, outputs=output, name='effnet2')
+    # print('Effnet-b2 parameters: ', model.count_params())
 
-    image_input = tf.keras.layers.Input(shape=[32, 280, 3])
-    output = efficientnet_v2.EfficientNetV2B0(image_input)
-    print(output.get_shape)
-    model = tf.keras.Model(inputs=image_input, outputs=output, name='effnetv2b0')
-    print('Effnetv2-B0 parameters: ', model.count_params())
+    # image_input = tf.keras.layers.Input(shape=[32, 280, 3])
+    # output = efficientnet_v1.EfficientNetB2s(image_input)
+    # print(output.get_shape)
+    # model = tf.keras.Model(inputs=image_input, outputs=output, name='effnet2s')
+    # print('Effnet-b2s parameters: ', model.count_params())
 
-    image_input = tf.keras.layers.Input(shape=[32, 280, 3])
-    output = efficientnet_v2.EfficientNetV2Slim(image_input)
-    print(output.get_shape)
-    model = tf.keras.Model(inputs=image_input, outputs=output, name='effnetv2slim')
-    print('Effnetv2-slim parameters: ', model.count_params())
+    # image_input = tf.keras.layers.Input(shape=[32, 280, 3])
+    # output = efficientnet_v1.EfficientNetB2t(image_input)
+    # print(output.get_shape)
+    # model = tf.keras.Model(inputs=image_input, outputs=output, name='effnet2t')
+    # print('Effnet-b2t parameters: ', model.count_params())
 
-    image_input = tf.keras.layers.Input(shape=[32, 280, 3])
-    output = efficientnet_v2.EfficientNetV2Tiny(image_input)
-    print(output.get_shape)
-    model = tf.keras.Model(inputs=image_input, outputs=output, name='effnetv2tiny')
-    print('Effnetv2-tiny parameters: ', model.count_params())
+    # image_input = tf.keras.layers.Input(shape=[32, 280, 3])
+    # output = efficientnet_v2.EfficientNetV2S(image_input)
+    # print(output.get_shape)
+    # model = tf.keras.Model(inputs=image_input, outputs=output, name='effnetv2s')
+    # print('Effnetv2-S parameters: ', model.count_params())
 
+    # image_input = tf.keras.layers.Input(shape=[32, 280, 3])
+    # output = efficientnet_v2.EfficientNetV2B0(image_input)
+    # print(output.get_shape)
+    # model = tf.keras.Model(inputs=image_input, outputs=output, name='effnetv2b0')
+    # print('Effnetv2-B0 parameters: ', model.count_params())
 
+    # image_input = tf.keras.layers.Input(shape=[32, 280, 3])
+    # output = efficientnet_v2.EfficientNetV2Slim(image_input)
+    # print(output.get_shape)
+    # model = tf.keras.Model(inputs=image_input, outputs=output, name='effnetv2slim')
+    # print('Effnetv2-slim parameters: ', model.count_params())
 
+    # image_input = tf.keras.layers.Input(shape=[32, 280, 3])
+    # output = efficientnet_v2.EfficientNetV2Tiny(image_input)
+    # print(output.get_shape)
+    # model = tf.keras.Model(inputs=image_input, outputs=output, name='effnetv2tiny')
+    # print('Effnetv2-tiny parameters: ', model.count_params())
