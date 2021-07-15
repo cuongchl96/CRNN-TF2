@@ -7,7 +7,7 @@ import argparse
 import logging
 
 from modules.feature_extractor.resnet import resnet18_slim, resnet50_slim, resnet50, resnet18
-from modules.feature_extractor import efficientnet_v1, efficientnet_v2
+from modules.feature_extractor import efficientnet_v1, efficientnet_v2, efficientnet_v1_multi
 from modules.sequence_modeling.bilstm import Attention_BiLSTM, BiLSTM, Attention_BiLSTM_v2, BiLSTM_v2
 from modules.model_head.attention import Attention
 from modules.model_head.ctc import CTC
@@ -23,6 +23,8 @@ backbone_factory = {
     'efficientnet-b3': efficientnet_v1.EfficientNetB3,
     'efficientnet-b4': efficientnet_v1.EfficientNetB4,
     'efficientnet-b0s': efficientnet_v1.EfficientNetB0s,
+    'efficientnet-b0sm': efficientnet_v1_multi.EfficientNetB0s,
+    'efficientnet-b3sm': efficientnet_v1_multi.EfficientNetB3s,
     'efficientnet-b1s': efficientnet_v1.EfficientNetB1s,
     'efficientnet-b2s': efficientnet_v1.EfficientNetB2s,
     'efficientnet-b3s': efficientnet_v1.EfficientNetB3s,
