@@ -43,7 +43,7 @@ def validator(model, generator, opt):
         num_steps += 1
         image = tf.convert_to_tensor(image)
         label = tf.convert_to_tensor(label)
-        length = tf.convert_to_tensor(length)
+        length = tf.expand_dims(tf.convert_to_tensor(length), 1)
 
         logits = model(image, training=False)
         logits_length = tf.shape(logits)[1] * tf.ones((tf.shape(logits)[0], 1), tf.int32)
