@@ -44,7 +44,7 @@ class ModelConfig(base_config.Config):
         BlockConfig.from_args(24, 40, 5, 2, 6, (2, 2), 0.25),
         BlockConfig.from_args(40, 80, 3, 3, 6, (1, 1), 0.25),
         BlockConfig.from_args(80, 112, 5, 3, 6, (1, 1), 0.25),
-        BlockConfig.from_args(112, 192, 5, 4, 6, (1, 1), 0.25),
+        BlockConfig.from_args(112, 192, 5, 4, 6, (2, 2), 0.25),
         BlockConfig.from_args(192, 320, 3, 1, 6, (1, 1), 0.25),
         # pylint: enable=bad-whitespace
     )
@@ -67,6 +67,7 @@ class ModelConfig(base_config.Config):
     rescale_input: bool = True
     data_format: str = 'channels_last'
     dtype: str = 'float32'
+
 
 @dataclass
 class ModelConfigSlim(base_config.Config):
@@ -107,6 +108,7 @@ class ModelConfigSlim(base_config.Config):
     rescale_input: bool = True
     data_format: str = 'channels_last'
     dtype: str = 'float32'
+
 
 @dataclass
 class ModelConfigTiny(base_config.Config):
@@ -478,81 +480,103 @@ def efficientnet(image_input: tf.keras.layers.Input, config: ModelConfig):
         config,
         activation=activation,
         name='top')
+    print(x.shape)
+    x = tf.keras.layers.Dense(512)(x)
     x = tf.transpose(x, perm=[0, 2, 1, 3])
     print(x.shape)
-    x = tf.reshape(x, [-1, x.get_shape()[1] * x.get_shape()[2], x.get_shape()[3]])
+    x = tf.reshape(x, [-1, x.get_shape()[1] *
+                   x.get_shape()[2], x.get_shape()[3]])
     # x = tf.squeeze(x, axis=1)
     return x
+
 
 def EfficientNet(image_input, model_name):
     if 's' in model_name:
         model_configs = MODEL_CONFIGS_SLIM[model_name]
+    elif 't' in model_name:
+        model_configs = MODEL_CONFIGS_TINY[model_name]
     else:
         model_configs = MODEL_CONFIGS[model_name]
 
     return efficientnet(image_input, model_configs)
 
+
 def EfficientNetB0(image_input):
     model_configs = MODEL_CONFIGS['efficientnet-b0']
     return efficientnet(image_input, model_configs)
 
+
 def EfficientNetB1(image_input):
     model_configs = MODEL_CONFIGS['efficientnet-b1']
     return efficientnet(image_input, model_configs)
-    
+
+
 def EfficientNetB2(image_input):
     model_configs = MODEL_CONFIGS['efficientnet-b2']
     return efficientnet(image_input, model_configs)
+
 
 def EfficientNetB3(image_input):
     model_configs = MODEL_CONFIGS['efficientnet-b3']
     return efficientnet(image_input, model_configs)
 
+
 def EfficientNetB4(image_input):
     model_configs = MODEL_CONFIGS['efficientnet-b4']
     return efficientnet(image_input, model_configs)
+
 
 def EfficientNetB0s(image_input):
     model_configs = MODEL_CONFIGS_SLIM['efficientnet-b0s']
     return efficientnet(image_input, model_configs)
 
+
 def EfficientNetB1s(image_input):
     model_configs = MODEL_CONFIGS_SLIM['efficientnet-b1s']
     return efficientnet(image_input, model_configs)
-    
+
+
 def EfficientNetB2s(image_input):
     model_configs = MODEL_CONFIGS_SLIM['efficientnet-b2s']
     return efficientnet(image_input, model_configs)
+
 
 def EfficientNetB3s(image_input):
     model_configs = MODEL_CONFIGS_SLIM['efficientnet-b3s']
     return efficientnet(image_input, model_configs)
 
+
 def EfficientNetB4s(image_input):
     model_configs = MODEL_CONFIGS_SLIM['efficientnet-b4s']
     return efficientnet(image_input, model_configs)
+
 
 def EfficientNetB0t(image_input):
     model_configs = MODEL_CONFIGS_TINY['efficientnet-b0t']
     return efficientnet(image_input, model_configs)
 
+
 def EfficientNetB1t(image_input):
     model_configs = MODEL_CONFIGS_TINY['efficientnet-b1t']
     return efficientnet(image_input, model_configs)
+
 
 def EfficientNetB2t(image_input):
     model_configs = MODEL_CONFIGS_TINY['efficientnet-b2t']
     return efficientnet(image_input, model_configs)
 
+
 def EfficientNetB3t(image_input):
     model_configs = MODEL_CONFIGS_TINY['efficientnet-b3t']
     return efficientnet(image_input, model_configs)
+
 
 def EfficientNetB4t(image_input):
     model_configs = MODEL_CONFIGS_TINY['efficientnet-b4t']
     return efficientnet(image_input, model_configs)
 
+
 if __name__ == "__main__":
-    image_input = tf.zeros([64, 32, 300, 3])
-    x = EfficientNetB3s(image_input)
+    image_input = tf.zeros([64, 48, 420, 3])
+    x = EfficientNetB0(image_input)
     print(x.shape)
