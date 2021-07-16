@@ -89,11 +89,11 @@ def get_crnn_transformer_ctc_model(image_tensor, is_train, opt=None):
     image_features = get_backbone(opt)(image_tensor)
     image_features *= tf.math.sqrt(tf.cast(image_features.get_shape()[-1], tf.float32))
 
-    pos_encoding = positional_encoding(image_features.get_shape()[1], image_features.get_shape()[-1])
+    pos_encoding = positional_encoding(image_features.get_shape()[1] * image_features.get_shape()[2], image_features.get_shape()[-1])
     SA_blocks = [TransformerBlock(image_features.get_shape()[-1], opt.transformer.num_heads, image_features.get_shape()[-1], 0.1) \
         for i in range(opt.transformer.num_layers)]
 
-    image_features += pos_encoding
+    image_features += pos_encoding[:, :image_features.get_shape()[1], :]
 
     sa_out = image_features
     for SA_block in SA_blocks:
