@@ -484,6 +484,8 @@ def efficientnet(image_input: tf.keras.layers.Input, config: ModelConfig):
 def EfficientNet(image_input, model_name):
     if 's' in model_name:
         model_configs = MODEL_CONFIGS_SLIM[model_name]
+    elif 't' in model_name:
+        model_configs = MODEL_CONFIGS_TINY[model_name]
     else:
         model_configs = MODEL_CONFIGS[model_name]
 
