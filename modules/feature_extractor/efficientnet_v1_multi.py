@@ -49,7 +49,7 @@ class ModelConfig(base_config.Config):
         # pylint: enable=bad-whitespace
     )
     stem_base_filters: int = 32
-    top_base_filters: int = 1280
+    top_base_filters: int = 512
     activation: str = 'simple_swish'
     batch_norm: str = 'default'
     bn_momentum: float = 0.99
@@ -481,7 +481,7 @@ def efficientnet(image_input: tf.keras.layers.Input, config: ModelConfig):
         activation=activation,
         name='top')
     print(x.shape)
-    x = tf.keras.layers.Dense(512)(x)
+    # x = tf.keras.layers.Dense(512)(x)
     x = tf.transpose(x, perm=[0, 2, 1, 3])
     print(x.shape)
     x = tf.reshape(x, [-1, x.get_shape()[1] *

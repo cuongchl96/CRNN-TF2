@@ -47,12 +47,20 @@ if __name__ == "__main__":
     num_totals = 0
         
     text_for_pred = tf.zeros([opt.training_params.batch_size, opt.model_params.max_len + 1], dtype=tf.int32)
-    for image, label, length in idnum.gen(opt.training_params.batch_size):
+    for image, label, length, comment in idnum.gen_with_fn(opt.training_params.batch_size):
         image = tf.convert_to_tensor(image)
         label = tf.convert_to_tensor(label)
 
         logits = model((image, text_for_pred), training=False)
         logits = tf.argmax(logits, axis=2)
+
+        pred = text_converter.decode(logits)
+        text = text_converter.decode(label[:, 1:])
+        for i in range(len(pred)):
+            if pred[i] != text[i]:
+                print(comment[i])
+                print(pred[i])
+                print(text[i])
 
         logits = logits.numpy()
         labels = label[:, 1:].numpy()

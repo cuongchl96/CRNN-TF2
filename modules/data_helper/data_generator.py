@@ -51,6 +51,19 @@ class Dataset(object):
             converted_image = [self.image_converter(im) for im in image]
             yield converted_image, converted_label, length
 
+    def gen_with_fn(self, batch_size):
+        self.dataset = self.dataset.batch(batch_size)
+        for batch in self.dataset:
+            image, label, comment = batch
+
+            image = [np.array(Image.open(IO(i)))[..., ::-1] for i in image.numpy()]
+            label = [t.decode('utf-8') for t in label.numpy()]
+            comment = comment.numpy()
+
+            converted_label, length = self.text_converter.encode(label)
+            converted_image = [self.image_converter(im) for im in image]
+            yield converted_image, converted_label, length, comment
+
     @staticmethod
     def _parse_record(example_proto):
         features = tf.io.parse_single_example(

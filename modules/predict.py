@@ -37,6 +37,22 @@ def evaluate(infer_fn, opt):
 
         print('Current accuracy: ', num_corrects * 1.0 / num_totals)
 
+def evaluate_case(infer_fn, opt):
+    generator = Dataset(opt.dataset.test_set, epochs=1, text_converter=text_converter, image_converter=image_converter)
+    num_corrects = 0
+    num_totals = 0
+        
+    text_for_pred = tf.zeros([opt.training_params.batch_size, opt.model_params.max_len + 1], dtype=tf.int32)
+    for image, label, length in generator.gen(opt.training_params.batch_size):
+        image = tf.convert_to_tensor(image)
+        label = tf.convert_to_tensor(label)
+
+        logits = infer_fn(image, text_for_pred)['tf.compat.v1.transpose']
+        logits = tf.argmax(logits, axis=2)
+
+        result = text_converter.decode(logits)
+        print(result)
+
 def predict(infer_fn, image_path, opt):
     image = cv2.imread(image_path)
     processed_image = tf.convert_to_tensor([image_converter(image)])
@@ -65,4 +81,5 @@ if __name__ == "__main__":
     infer._num_positional_args = 2
 
     # evaluate(infer, opt)
-    predict(infer, '/media/cuongvc/UBUNTU/home/cuongvc/cuongltb/aocr/datasets/idcards/idnum/image/2020-02-03-15-28-38_211442911_VO-THI-CHANH_True.jpg', opt)
+    evaluate_case(infer, opt)
+    # predict(infer, '/media/cuongvc/UBUNTU/home/cuongvc/cuongltb/aocr/datasets/idcards/idnum/image/2020-02-03-15-28-38_211442911_VO-THI-CHANH_True.jpg', opt)
