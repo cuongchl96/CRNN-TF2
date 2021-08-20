@@ -24,12 +24,13 @@ from __future__ import division
 from __future__ import print_function
 
 import math
-
+import numpy as np
 import tensorflow as tf
 from typing import Any, Dict, List, Optional, Text, Tuple
 
 from tensorflow.python.keras.layers.preprocessing import image_preprocessing as image_ops
-
+import imgaug as ia
+import imgaug.augmenters as iaa
 # This signifies the max integer that the controller RNN could predict for the
 # augmentation scheme.
 _MAX_LEVEL = 10.
@@ -989,3 +990,53 @@ class RandAugment(ImageAugment):
 
         image = tf.cast(image, dtype=input_image_type)
         return image
+
+class ImgaugAugment(ImageAugment):
+    def __init__(self, level):
+        self.level = 1
+        self.sometimes = lambda aug: iaa.Sometimes(0.5, aug)
+        self.rarely = lambda aug: iaa.Sometimes(0.3, aug)
+        self.seq = iaa.Sequential([
+            self.sometimes(iaa.OneOf([
+                iaa.imgcorruptlike.GaussianNoise(severity=self.level),
+                iaa.imgcorruptlike.ShotNoise(severity=self.level),
+                iaa.imgcorruptlike.ImpulseNoise(severity=self.level),
+                iaa.imgcorruptlike.SpeckleNoise(severity=self.level),
+            ])),
+
+            self.sometimes(iaa.OneOf([
+                iaa.imgcorruptlike.GaussianBlur(severity=self.level),
+                iaa.imgcorruptlike.GlassBlur(severity=self.level),
+                iaa.imgcorruptlike.DefocusBlur(severity=self.level),
+                iaa.imgcorruptlike.MotionBlur(severity=self.level),
+                iaa.imgcorruptlike.ZoomBlur(severity=self.level),
+
+            ])),
+
+            self.sometimes(iaa.OneOf([
+                iaa.imgcorruptlike.Fog(severity=self.level),
+                iaa.imgcorruptlike.Frost(severity=self.level),
+                iaa.imgcorruptlike.Snow(severity=self.level),
+                iaa.imgcorruptlike.Spatter(severity=self.level),
+            ])),
+
+            self.rarely(iaa.OneOf([
+                iaa.imgcorruptlike.Brightness(severity=self.level),
+                iaa.imgcorruptlike.Contrast(severity=self.level),
+                iaa.imgcorruptlike.Saturate(severity=self.level),
+            ])),
+
+            self.sometimes(iaa.OneOf([
+                iaa.imgcorruptlike.Pixelate(severity=self.level),
+                iaa.imgcorruptlike.JpegCompression(severity=self.level),
+                iaa.imgcorruptlike.ElasticTransform(severity=self.level),
+            ])),
+
+        ], random_order=True) # apply augmenters in random order
+    def distort(self, image):
+        try:
+            distorted_image = self.seq(images=np.array([image]))[0]
+        except:
+            return image
+
+        return distorted_image

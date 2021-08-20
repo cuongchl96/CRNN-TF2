@@ -8,7 +8,6 @@ import tensorflow as tf
 import math
 import random
 import cv2
-
 from PIL import Image
 
 from modules.data_helper import augmenter
@@ -82,6 +81,7 @@ class NormalizePAD(object):
         self.max_size = (opt.model_params.imgH, opt.model_params.imgW, opt.model_params.num_channels)
         self.is_training = is_training
         self.augment = augmenter.RandAugment(magnitude=opt.data_augmentation.augment_level)
+        self.sub_augment = augmenter.ImgaugAugment(level=opt.data_augmentation.augment_level)
 
     def __call__(self, img):
         h, w, c = img.shape
@@ -93,6 +93,18 @@ class NormalizePAD(object):
 
         img = cv2.resize(img, (resized_w, self.max_size[0]))
 
+        if self.is_training and random.random() < self.opt.data_augmentation.prob:
+            if random.random() < 0.5:
+                img = tf.convert_to_tensor(img)
+                img = self.augment.distort(img)
+                img = img.numpy().astype(np.uint8)
+            else:
+                img = self.sub_augment.distort(img)
+
+            # Stretch and Shrink
+            if random.random() < 0.3:
+                img = cv2.resize(img, (self.max_size[0], self.max_size[0]))
+
         h, w = img.shape[:2]
         pad_img = np.zeros((self.max_size[0], self.max_size[1], 3), dtype=np.uint8)
         if self.is_training:
@@ -102,17 +114,12 @@ class NormalizePAD(object):
         
         pad_img[:, start_w:start_w + w, :] = img
 
-        if self.is_training and random.random() < self.opt.data_augmentation.prob:
-            pad_img = tf.convert_to_tensor(pad_img)
-            pad_img = self.augment.distort(pad_img)
-            pad_img = pad_img.numpy().astype(np.uint8)
-
         if self.max_size[-1] == 1:
             pad_img = cv2.cvtColor(pad_img, cv2.COLOR_BGR2GRAY)
             pad_img = np.expand_dims(pad_img, -1)
 
         pad_img = pad_img.astype(np.float32) / 255.
-        pad_img = (pad_img - 0.5) / 0.5
+        # pad_img = (pad_img - 0.5) / 0.5
         return tf.convert_to_tensor(pad_img)
 
 class CTCLabelConverter(object):
