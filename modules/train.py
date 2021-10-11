@@ -26,7 +26,7 @@ if gpus:
     try:
         tf.config.experimental.set_virtual_device_configuration(
             gpus[0],
-            [tf.config.experimental.VirtualDeviceConfiguration(memory_limit=1024 * 3)])
+            [tf.config.experimental.VirtualDeviceConfiguration(memory_limit=1024 * 2.5)])
         logical_gpus = tf.config.experimental.list_logical_devices('GPU')
         print(len(gpus), "Physical GPUs,", len(logical_gpus), "Logical GPUs")
     except RuntimeError as e:
@@ -52,6 +52,15 @@ def validator(model, generator, opt):
         num_totals += len(logits)
         num_corrects += np.sum(np.sum(logits - labels, axis=1) == 0)
         total_loss += loss
+
+        if num_steps == 1:
+            prediction = text_converter.decode(tf.convert_to_tensor(logits))
+            true_label = text_converter.decode(tf.convert_to_tensor(labels))
+            logging.info('Samples prediction.............')
+            for i in range(5):
+                logging.info('Prediction: %s' %(prediction[i]))
+                logging.info('Label: %s\n' %(true_label[i]))
+
 
     return num_corrects * 100.0 / num_totals, total_loss / num_steps
 
@@ -97,7 +106,13 @@ if __name__ == "__main__":
         checkpoint, os.path.join(opt.training_params.log_dir), max_to_keep=3)
     latest_checkpoint = checkpoint_manager.latest_checkpoint
     if not latest_checkpoint:
-        logging.info('No checkpoint found. Create model with fresh parameters')
+        logging.info('No checkpoint found. Finding pretrained model........')
+        if opt.training_params.pretrain_ckpt is not None:
+            logging.info('Found pretrained model %s', opt.training_params.pretrain_ckpt)
+            checkpoint = tf.train.Checkpoint(model=model)
+            checkpoint.restore(opt.training_params.pretrain_ckpt)
+        else:
+            logging.info('No pretrained model found. Creating model with new parameters...')
     else:
         logging.info(
             'Checkpoint file %s found and restoring from ''checkpoint', latest_checkpoint)
