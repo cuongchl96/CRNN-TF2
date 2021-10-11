@@ -1,0 +1,29 @@
+model_build:
+  backbone: efficientnet-b2s
+  sequence_modeling: abilstm
+  model_head: attention
+model_params:
+  imgH: 32
+  imgW: 180
+  num_channels: 3
+  max_len: 20
+  hidden_size: 256
+  character: "0123456789àÀảẢãÃáÁạẠăĂằẰẳẲẵẴắẮặẶâÂầẦẩẨẫẪấẤậẬđĐèÈẻẺẽẼéÉẹẸêÊềỀểỂễỄếẾệỆìÌỉỈĩĨíÍịỊòÒỏỎõÕóÓọỌôÔồỒổỔỗỖốỐộỘơƠờỜởỞỡỠớỚợỢùÙủỦũŨúÚụỤưƯừỪửỬữỮứỨựỰỳỲỷỶỹỸýÝỵỴ/-QWERTYUIOPASDFGHJKLZXCVBNMqwertyuiopasdfghjklzxcvbnm,.':"
+dataset:
+  train_set: datasets/GENERIC/syn_vnm_generic_batch_001.tfrecords datasets/GENERIC/syn_vnm_generic_batch_006.tfrecords datasets/ADDR/all_dob_addr_train.tfrecords datasets/ETHREL/bs_klp_train_ethrel.tfrecords datasets/ETHREL/syn_ethrel_batch_001.tfrecords datasets/FEATURES/syn_features_batch_006.tfrecords datasets/FEATURES/syn_features_batch_003.tfrecords datasets/FEATURES/bs_klp_train_features.tfrecords datasets/NAME/name_train.tfrecords datasets/NAME/name_klp.tfrecords datasets/DOI/backside_test_number.tfrecords datasets/DOI/backside_valid_number.tfrecords datasets/DOI/backside_train_number.tfrecords datasets/DOI/bs_klp_train_doi.tfrecords datasets/DOI/syn_doi_batch_003.tfrecords datasets/DOI/syn_doi_batch_002.tfrecords datasets/POI/address_poi.tfrecords datasets/POI/backside_train.tfrecords datasets/POI/backside_test.tfrecords datasets/POI/backside_valid.tfrecords datasets/POI/bs_klp_train.tfrecords datasets/POI/syn_poi_batch_005.tfrecords datasets/POI/syn_poi_batch_006.tfrecords datasets/POI/syn_poi_batch_007.tfrecords datasets/POI/syn_poi_batch_008.tfrecords datasets/POI/syn_poi_batch_009.tfrecords datasets/IDNum/idnum_train.tfrecords
+  # train_set: datasets/GENERIC/syn_vnm_generic_batch_001.tfrecords
+  valid_set: datasets/ADDR/all_dob_addr_valid.tfrecords
+  test_set: datasets/ADDR/all_dob_addr_test.tfrecords
+data_augmentation:
+  prob: 0.3
+  augment_level: 3
+training_params:
+  optimizer: Adadelta
+  num_epochs: 5
+  batch_size: 64
+  initial_lnr: 0.1
+  num_warmup_steps: 0
+  log_dir: checkpoints/GENERIC/b2s-attention-rgb180-finetune
+  pretrain_ckpt: checkpoints/GENERIC/effnetb2s-rgb180/ckpt-15
+  log_interval: 200
+  save_interval: 40000
